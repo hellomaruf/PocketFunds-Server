@@ -18,7 +18,7 @@ app.use(cors(corsOptions));
 // const uri = `mongodb://PocketFunds:${process.env.PASS}@ac-dyjlgmy-shard-00-00.xq5doar.mongodb.net:27017,ac-dyjlgmy-shard-00-01.xq5doar.mongodb.net:27017,ac-dyjlgmy-shard-00-02.xq5doar.mongodb.net:27017/?replicaSet=atlas-45tt8x-shard-0&ssl=true&authSource=admin&retryWrites=true&w=majority&appName=Cluster0`;
 // const uri = `mongodb+srv://PocketFundsDB:qu4b5dRFgvsdKixF@cluster0.0o9qayn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 const uri =
-  "mongodb+srv://PocketFundsDB:8DiLKXRbxWNKUEne@cluster0.0o9qayn.mongodb.net/?appName=Cluster0";
+  "mongodb://PocketFundsDB:8DiLKXRbxWNKUEne@ac-tuztplb-shard-00-00.0o9qayn.mongodb.net:27017,ac-tuztplb-shard-00-01.0o9qayn.mongodb.net:27017,ac-tuztplb-shard-00-02.0o9qayn.mongodb.net:27017/?replicaSet=atlas-z73jlu-shard-0&ssl=true&authSource=admin&retryWrites=true&w=majority&appName=Cluster0";
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -46,6 +46,7 @@ async function run() {
         roleRequest,
         password,
         pin: hashPin,
+        status: "pending",
       };
       console.log(user);
       const result = await usersCollection.insertOne(user);
@@ -59,6 +60,32 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/loginUser", async (req, res) => {
+      const userInfo = req.body;
+      // console.log(userInfo);
+      const email = userInfo.email;
+      const pin = userInfo.pin;
+      // console.log(email, pin);
+      const currentUser = await usersCollection.findOne({ email });
+      const status = currentUser?.status;
+      // console.log(currentUser);
+      const combinePin = pin.join("");
+      console.log(pin, currentUser?.pin, combinePin);
+      const validPin = await bcrypt.compare(combinePin, currentUser?.pin);
+      console.log(validPin);
+      if (!validPin) {
+        return res.send({ message: "Invalid Pin" }).status(400);
+        // return res.send({ message: "You are Logged In" }).status(200);
+      }
+      if (currentUser?.email !== email) {
+        return res.send({ message: "Email Not Matched!" });
+      }
+      if (currentUser?.email === email && status === "accepted") {
+        return res.send({ message: "Login Successfully!" });
+      } else {
+        return res.send({ message: "Wait for admin approval!" });
+      }
+    });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
