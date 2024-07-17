@@ -90,12 +90,27 @@ async function run() {
     // Get user data by email****************
     app.get("/loggedUser/:email", async (req, res) => {
       const email = req.params.email;
-      console.log(email);
       const result = await usersCollection.findOne({ email });
-      console.log(result);
-      res.send(result)
+      res.send(result);
     });
 
+    app.patch("/sendMoney", async (req, res) => {
+      const data = req.body;
+      console.log(data);
+      const sendedAmount = parseFloat(data.sendAmount);
+      console.log(parseFloat(sendedAmount));
+      const receverEmail = data.receverEmail;
+      const filter = { email: receverEmail };
+      console.log(receverEmail);
+      const updateBalance = {
+        $set: {
+          balance: sendedAmount,
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateBalance);
+      res.send(result);
+      console.log(result);
+    });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
