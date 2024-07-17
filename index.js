@@ -86,6 +86,16 @@ async function run() {
         return res.send({ message: "Wait for admin approval!" });
       }
     });
+
+    // Get user data by email****************
+    app.get("/loggedUser/:email", async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const result = await usersCollection.findOne({ email });
+      console.log(result);
+      res.send(result)
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
