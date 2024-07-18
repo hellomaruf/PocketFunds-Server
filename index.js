@@ -100,16 +100,45 @@ async function run() {
       const sendedAmount = parseFloat(data.sendAmount);
       console.log(parseFloat(sendedAmount));
       const receverEmail = data.receverEmail;
-      const filter = { email: receverEmail };
+      const senderEmail = data.senderEmail;
+      const receverFilter = { email: receverEmail };
+      const senderFilter = { email: senderEmail };
       console.log(receverEmail);
-      const updateBalance = {
-        $set: {
-          balance: sendedAmount,
-        },
-      };
-      const result = await usersCollection.updateOne(filter, updateBalance);
-      res.send(result);
-      console.log(result);
+      const currentUser = await usersCollection.findOne({
+        email: senderEmail,
+      });
+      console.log(currentUser.pin);
+      const pin = data.pin.join("");
+      const validPin = await bcrypt.compare(pin, currentUser?.pin);
+      console.log(validPin);
+      if (validPin) {
+        const removeBalance = {
+          $inc: {
+            balance: -sendedAmount + sendedAmount * 0.05,
+          },
+        };
+        const senderResult = await usersCollection.updateOne(
+          senderFilter,
+          removeBalance
+        );
+
+        const addBalance = {
+          $inc: {
+            balance: sendedAmount,
+          },
+        };
+        const receverResult = await usersCollection.updateOne(
+          receverFilter,
+          addBalance
+        );
+        res
+          .status(200)
+          .send(
+            { message: "Send money Successfully!" },
+            receverResult,
+            senderResult
+          );
+      }
     });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
