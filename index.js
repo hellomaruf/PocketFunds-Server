@@ -94,11 +94,11 @@ async function run() {
       res.send(result);
     });
 
+    // Send money ************
     app.patch("/sendMoney", async (req, res) => {
       const data = req.body;
       console.log(data);
       const sendedAmount = parseFloat(data.sendAmount);
-      console.log(parseFloat(sendedAmount));
       const receverEmail = data.receverEmail;
       const senderEmail = data.senderEmail;
       const receverFilter = { email: receverEmail };
@@ -140,6 +140,44 @@ async function run() {
           );
       }
     });
+
+    // Cash Out***************
+    app.patch("/cashOut", async (req, res) => {
+      const senderData = req.body;
+      console.log(senderData);
+      const senderAmount = parseFloat(senderData?.sendAmount);
+      const senderEmail = senderData?.senderEmail;
+      const agentEmail = senderData?.receverEmail;
+      const senderPin = senderData?.pin;
+      const agentFilter = { email: agentEmail };
+      const senderFilter = { email: senderEmail };
+      const feePercentage = 1.5 / 100;
+      const fee = senderAmount * feePercentage;
+      const agentUpdateDoc = {
+        $inc: {
+          balance: senderAmount + fee,
+        },
+      };
+      const senderUpdateDoc = {
+        $inc: {
+          balance: -(senderAmount - fee),
+        },
+      };
+
+      const agentResult = await usersCollection.updateOne(
+        agentFilter,
+        agentUpdateDoc
+      );
+      const senderResult = await usersCollection.updateOne(
+        senderFilter,
+        senderUpdateDoc
+      );
+
+      res
+        .send({ message: "Cash Out Successfully!" }, agentResult, senderResult)
+        .status(200);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
