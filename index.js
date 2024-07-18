@@ -178,6 +178,22 @@ async function run() {
         .status(200);
     });
 
+    // cash in **************
+    app.patch("/cashIn", async (req, res) => {
+      const cashInData = req.body;
+      console.log(cashInData);
+      const senderEmail = cashInData.senderEmail;
+      const receverEmail = cashInData.receverEmail;
+      const cashInReq = cashInData.cashInReq;
+      const pin = cashInData.pin;
+      const senderAmount = cashInData.sendAmount;
+      if (cashInReq === "pending") {
+        return res.send({ message: "Wait for agent aproval" });
+      }
+      if (cashInReq === "accepted") {
+        return res.send({ message: "succesfully cash in" });
+      }
+    });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
