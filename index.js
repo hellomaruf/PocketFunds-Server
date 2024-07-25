@@ -35,7 +35,16 @@ async function run() {
 
     // Added user Data**************
     app.post("/users", async (req, res) => {
-      const { name, email, phoneNum, roleRequest, password, pin } = req.body;
+      const {
+        name,
+        email,
+        phoneNum,
+        roleRequest,
+        password,
+        pin,
+        role,
+        balance,
+      } = req.body;
       const hashPin = bcrypt.hashSync(pin, 6);
       const users = req.body;
       console.log(users);
@@ -47,6 +56,8 @@ async function run() {
         password,
         pin: hashPin,
         status: "pending",
+        role,
+        balance,
       };
       console.log(user);
       const result = await usersCollection.insertOne(user);
@@ -194,6 +205,13 @@ async function run() {
         return res.send({ message: "succesfully cash in" });
       }
     });
+
+    // update user request as user*************
+    app.patch("/userReq", async (req, res) => {
+      const data = req.body;
+      console.log(data);
+    });
+
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
