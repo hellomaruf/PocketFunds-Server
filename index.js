@@ -209,7 +209,6 @@ async function run() {
     // update user request as user*************
     app.patch("/userReq/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const filter = { _id: new ObjectId(id) };
       console.log(filter);
       const updateDoc = {
@@ -221,6 +220,20 @@ async function run() {
       };
       const result = await usersCollection.updateOne(filter, updateDoc);
       // res.send({ message: "Update Successfully!" }, result).status(200);
+      res.send(result);
+    });
+
+    // update user request as a agent************
+    app.patch("/agentReq/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: "agent",
+          status: "accepted",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
