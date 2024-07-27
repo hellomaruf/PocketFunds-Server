@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 3000;
 
 // middleware
@@ -207,9 +207,21 @@ async function run() {
     });
 
     // update user request as user*************
-    app.patch("/userReq", async (req, res) => {
-      const data = req.body;
-      console.log(data);
+    app.patch("/userReq/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      console.log(filter);
+      const updateDoc = {
+        $set: {
+          // TODO :  add update doc
+          role: "user",
+          status: "accepted",
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updateDoc);
+      // res.send({ message: "Update Successfully!" }, result).status(200);
+      res.send(result);
     });
 
     console.log(
